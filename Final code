@@ -18,18 +18,18 @@ class ExplorationEnhancedQLearning:
 
         # Environment map
         self.env_map = np.array([
-            ['S', 'F', 'W', 'W', 'W', 'W', 'W', 'W'],
-            ['W', 'F', 'W', 'H', 'H', 'H', 'W', 'W'],
-            ['W', 'F', 'W', 'H', 'F', 'W', 'F', 'W'],
-            ['W', 'F', 'W', 'F', 'F', 'W', 'F', 'W'],
-            ['W', 'F', 'F', 'H', 'F', 'F', 'F', 'W'],
-            ['W', 'W', 'F', 'F', 'F', 'W', 'F', 'H'],
-            ['W', 'H', 'F', 'F', 'F', 'H', 'F', 'H'],
-            ['W', 'W', 'F', 'W', 'F', 'W', 'G', 'W']
+            ['S', 'F', 'F', 'F', 'F', 'H', 'F', 'F'],
+            ['F', 'F', 'H', 'F', 'F', 'H', 'F', 'F'],
+            ['F', 'F', 'W', 'H', 'F', 'H', 'F', 'F'],
+            ['H', 'F', 'F', 'F', 'W', 'F', 'F', 'F'],
+            ['F', 'F', 'F', 'H', 'F', 'F', 'H', 'F'],
+            ['F', 'F', 'H', 'F', 'F', 'F', 'F', 'F'],
+            ['W', 'F', 'F', 'F', 'H', 'H', 'F', 'H'],
+            ['F', 'F', 'F', 'F', 'W', 'F', 'G', 'F']
         ])
 
         # Hyperparameters
-        self.alpha = 0.15
+        self.alpha = 0.1
         self.gamma = 0.95
         self.epsilon = 1.0
         self.epsilon_min = 0.1
@@ -109,7 +109,7 @@ class ExplorationEnhancedQLearning:
             new_row, new_col = row + drow, col + dcol
 
             if not (0 <= new_row < 8 and 0 <= new_col < 8):
-                return state, -0.5, False, "wall"
+                return state, -0.9, False, "wall"
 
             new_state = new_row * 8 + new_col
             cell = self.env_map[new_row, new_col]
@@ -118,6 +118,8 @@ class ExplorationEnhancedQLearning:
                 return new_state, -1.0, True, "hole"
             elif cell == 'G':
                 return new_state, 10.0, True, "goal"  # Keep strong goal reward
+            elif cell == 'W':
+                return state, -0.5, False, "wall"
             else:
                 return new_state, 0.0, False, "move"
 
@@ -136,6 +138,7 @@ class ExplorationEnhancedQLearning:
         if outcome == "move" or outcome == "goal":
             exploration_reward = self.get_exploration_bonus(next_state)
             total_reward += exploration_reward
+            
 
             # Record exploration reward for analysis
             if exploration_reward > 0:
@@ -453,7 +456,7 @@ class ExplorationEnhancedQLearning:
                 best_action = np.argmax(self.q_table[state])
                 arrow = arrow_map[best_action]
                 ax[0].text(c + 0.5, r + 0.5, arrow, ha='center', va='center',
-                           color='white' if cell_type == 'W' else 'black', fontsize=12, fontweight='bold')
+                           color='white', fontsize=20, fontweight='bold')
 
             # Display Q-value for the best action (or overall max Q-value for the state)
             max_q_val = np.max(self.q_table[state])
